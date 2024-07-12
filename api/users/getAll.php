@@ -1,5 +1,5 @@
 <?php
-require "../connection.php";
+require "../../connection.php";
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('select * from users');
     $stmt->execute();
