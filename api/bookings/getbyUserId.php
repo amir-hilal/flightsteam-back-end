@@ -1,7 +1,9 @@
 <?php
-require "../connection.php";
+require "../../connection.php";
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $stmt = $conn->prepare('select * from bookings');
+    $id = $_GET['id'];
+    $stmt = $conn->prepare('select * from bookings Where user_id=?');
+    $stmt->bind_param('i', $id);
     $stmt->execute();
     $result = $stmt->get_result();
     $bookings = [];

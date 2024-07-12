@@ -1,17 +1,17 @@
 <?php
-require "../connection.php";
+require "../../connection.php";
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $stmt = $conn->prepare('select * from companies');
+    $stmt = $conn->prepare('select * from bookings');
     $stmt->execute();
     $result = $stmt->get_result();
-    $companies = [];
+    $bookings = [];
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $companies[] = $row;
+            $bookings[] = $row;
         }
-        echo json_encode(["companies" => $companies]);
+        echo json_encode(["bookings" => $bookings]);
     } else {
-        echo json_encode(["message" => "no companies were found"]);
+        echo json_encode(["message" => "no bookings were found"]);
     }
 } else {
     echo json_encode(["error" => "Wrong request method"]);
