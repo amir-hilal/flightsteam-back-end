@@ -4,12 +4,12 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('select * from airports');
     $stmt->execute();
     $result = $stmt->get_result();
-    $users = [];
+    $airports = [];
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $users[] = $row;
+            $airports[] = $row;
         }
-        echo json_encode(["users" => $users]);
+        echo json_encode(["airports" => $airports]);
     } else {
         echo json_encode(["message" => "no airports were found"]);
     }
