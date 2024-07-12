@@ -4,12 +4,12 @@ require "../../connection.php";
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $id = $_POST['id'];
     $name = $_POST["name"];
-    $location = $_POST["location"];
+    $location_id = $_POST["location_id"];
     $code = $_POST["code"];
 
     // Correct the SQL statement
-    $stmt = $conn->prepare('UPDATE airports SET name=?, location=?, code=? WHERE airport_id=?');
-    $stmt->bind_param('sssi', $name, $location, $code, $id);
+    $stmt = $conn->prepare('UPDATE airports SET name=?, location_id=?, code=? WHERE airport_id=?');
+    $stmt->bind_param('sisi', $name, $location_id, $code, $id);
 
     try {
         $stmt->execute();
