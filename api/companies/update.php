@@ -3,16 +3,17 @@ require "../../connection.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $id = $_POST['id'];
+    $name = $_POST['name'];
 
-    $stmt = $conn->prepare('DELETE FROM users WHERE user_id=?');
-    $stmt->bind_param('i', $id);
+    $stmt = $conn->prepare('UPDATE companies SET name=? WHERE company_id=?');
+    $stmt->bind_param('si', $name,$id);
 
     try {
         $stmt->execute();
         if ($stmt->affected_rows > 0) {
-            echo json_encode(["message" => "User deleted", "status" => "success"]);
+            echo json_encode(["message" => "company updated", "status" => "success"]);
         } else {
-            echo json_encode(["message" => "No user found with the given ID", "status" => "error"]);
+            echo json_encode(["message" => "No company found with the given ID or no changes made", "status" => "error"]);
         }
     } catch (Exception $e) {
         echo json_encode(["error" => $stmt->error]);
