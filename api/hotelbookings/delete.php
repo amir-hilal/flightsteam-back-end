@@ -2,13 +2,13 @@
 require "../../connection.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $taxi_id = $_POST["taxi_id"];
+    $hotel_booking_id = $_POST["hotel_booking_id"];
 
-    $stmt = $conn->prepare('DELETE FROM Taxis WHERE taxi_id = ?;');
-    $stmt->bind_param('i', $taxi_id);
+    $stmt = $conn->prepare('DELETE FROM HotelBookings WHERE hotel_booking_id = ?;');
+    $stmt->bind_param('i', $hotel_booking_id);
     try {
         $stmt->execute();
-        echo json_encode(["message" => "taxi deleted", "status" => "success"]);
+        echo json_encode(["message" => "hotel booking deleted", "status" => "success"]);
     } catch (Exception $e) {
         echo json_encode(["error" => $stmt->error]);
     }
