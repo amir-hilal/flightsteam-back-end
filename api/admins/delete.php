@@ -1,5 +1,7 @@
 <?php
 require "../../config/config.php";
+require "../utils/auth_middleware.php";
+$admin = authenticate_admin();
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $admin_id = $_POST["admin_id"];
