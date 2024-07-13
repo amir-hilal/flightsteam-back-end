@@ -1,5 +1,5 @@
 <?php
-require "../../connection.php";
+require "../../config/config.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('SELECT * FROM Hotels;');
