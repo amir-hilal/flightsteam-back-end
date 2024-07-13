@@ -1,3 +1,4 @@
+// api/flights/getAll.php
 <?php
 require "../../config/config.php";
 

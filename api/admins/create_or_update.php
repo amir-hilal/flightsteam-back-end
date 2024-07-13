@@ -1,8 +1,8 @@
-// api/admins/create_or_update.php
+<!-- // api/admins/create_or_update.php -->
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
-$admin = authenticate_admin();
+$admin = authenticate_superadmin(); // Ensure only superadmins can add or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Decode JSON input

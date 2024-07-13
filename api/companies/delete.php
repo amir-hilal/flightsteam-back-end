@@ -1,8 +1,18 @@
+// api/companies/delete.php
 <?php
 require "../../config/config.php";
+require "../utils/auth_middleware.php";
+$admin = authenticate_admin(); // Ensure only admins can delete
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $id = $_POST['id'];
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if ($data === null) {
+        echo json_encode(["error" => "Invalid JSON input"]);
+        exit();
+    }
+
+    $id = $data['id'];
 
     $stmt = $conn->prepare('DELETE FROM companies WHERE company_id=?');
     $stmt->bind_param('i', $id);
@@ -10,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     try {
         $stmt->execute();
         if ($stmt->affected_rows > 0) {
-            echo json_encode(["message" => "company deleted", "status" => "success"]);
+            echo json_encode(["message" => "Company deleted", "status" => "success"]);
         } else {
             echo json_encode(["message" => "No company found with the given ID", "status" => "error"]);
         }

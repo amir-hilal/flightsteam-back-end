@@ -18,11 +18,20 @@ function authenticate_admin() {
     }
 
     $decoded = validate_jwt_token($jwt);
-    if (!$decoded || $decoded['role'] !== 'admin') {
+    if (!$decoded || ($decoded['role'] !== 'admin' && $decoded['role'] !== 'superadmin')) {
         send_response(null, 'Invalid token or insufficient permissions', 401);
         exit();
     }
 
     return $decoded;
+}
+
+function authenticate_superadmin() {
+    $admin = authenticate_admin();
+    if ($admin['role'] !== 'superadmin') {
+        send_response(null, 'Superadmin permissions required', 403);
+        exit();
+    }
+    return $admin;
 }
 ?>

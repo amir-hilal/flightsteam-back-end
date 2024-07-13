@@ -1,7 +1,8 @@
+// api/admins/getAll.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
-$admin = authenticate_admin();
+$admin = authenticate_admin(); // Allow all admins to get all admin accounts
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('SELECT * FROM AdminAccounts;');

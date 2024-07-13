@@ -1,3 +1,4 @@
+// api/locations/getAll.php
 <?php
 require "../../config/config.php";
 

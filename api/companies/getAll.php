@@ -1,7 +1,9 @@
+<!-- // api/companies/getAll.php -->
 <?php
 require "../../config/config.php";
+
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $stmt = $conn->prepare('select * from companies');
+    $stmt = $conn->prepare('SELECT * FROM companies');
     $stmt->execute();
     $result = $stmt->get_result();
     $companies = [];
@@ -11,8 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
         echo json_encode(["companies" => $companies]);
     } else {
-        echo json_encode(["message" => "no companies were found"]);
+        echo json_encode(["message" => "No companies were found"]);
     }
 } else {
     echo json_encode(["error" => "Wrong request method"]);
 }
+?>

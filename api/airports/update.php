@@ -1,13 +1,22 @@
+<!-- // api/airports/update.php -->
 <?php
 require "../../config/config.php";
+require "../utils/auth_middleware.php";
+$admin = authenticate_admin(); // Ensure only admins can update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $id = $_POST['id'];
-    $name = $_POST["name"];
-    $location = $_POST["location"];
-    $code = $_POST["code"];
+    $data = json_decode(file_get_contents('php://input'), true);
 
-    // Correct the SQL statement
+    if ($data === null) {
+        echo json_encode(["error" => "Invalid JSON input"]);
+        exit();
+    }
+
+    $id = $data['id'];
+    $name = $data["name"];
+    $location = $data["location"];
+    $code = $data["code"];
+
     $stmt = $conn->prepare('UPDATE airports SET name=?, location=?, code=? WHERE airport_id=?');
     $stmt->bind_param('sssi', $name, $location, $code, $id);
 

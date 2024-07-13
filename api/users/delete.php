@@ -1,8 +1,18 @@
+// api/users/delete.php
 <?php
 require "../../config/config.php";
+require "../utils/auth_middleware.php";
+$admin = authenticate_admin(); // Ensure only admins can delete
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $id = $_POST['id'];
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if ($data === null) {
+        echo json_encode(["error" => "Invalid JSON input"]);
+        exit();
+    }
+
+    $id = $data['id'];
 
     $stmt = $conn->prepare('DELETE FROM users WHERE user_id=?');
     $stmt->bind_param('i', $id);

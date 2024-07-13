@@ -1,7 +1,9 @@
+<!-- // api/airports/getAll.php -->
 <?php
 require "../../config/config.php";
+
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $stmt = $conn->prepare('select * from airports');
+    $stmt = $conn->prepare('SELECT * FROM airports');
     $stmt->execute();
     $result = $stmt->get_result();
     $airports = [];
@@ -11,8 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
         echo json_encode(["airports" => $airports]);
     } else {
-        echo json_encode(["message" => "no airports were found"]);
+        echo json_encode(["message" => "No airports were found"]);
     }
 } else {
     echo json_encode(["error" => "Wrong request method"]);
 }
+?>
