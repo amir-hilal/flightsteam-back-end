@@ -25,7 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         try {
             $stmt->execute();
             if ($stmt->affected_rows > 0) {
-                echo json_encode(["message" => "Hotel updated", "status" => "success"]);
+                // Fetch the updated hotel details
+                $stmt = $conn->prepare('SELECT * FROM Hotels WHERE hotel_id=?');
+                $stmt->bind_param('i', $hotel_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $updated_hotel = $result->fetch_assoc();
+                echo json_encode(["message" => "Hotel updated", "status" => "success", "hotel" => $updated_hotel]);
             } else {
                 echo json_encode(["message" => "No hotel found with the given ID or no changes made", "status" => "error"]);
             }
@@ -38,7 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('sidi', $name, $location_id, $price_per_night, $available_rooms);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "New hotel created", "status" => "success"]);
+            // Fetch the created hotel details
+            $hotel_id = $stmt->insert_id;
+            $stmt = $conn->prepare('SELECT * FROM Hotels WHERE hotel_id=?');
+            $stmt->bind_param('i', $hotel_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $created_hotel = $result->fetch_assoc();
+            echo json_encode(["message" => "New hotel created", "status" => "success", "hotel" => $created_hotel]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }

@@ -22,7 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         try {
             $stmt->execute();
             if ($stmt->affected_rows > 0) {
-                echo json_encode(["message" => "Company updated", "status" => "success"]);
+                // Fetch the updated company details
+                $stmt = $conn->prepare('SELECT * FROM companies WHERE company_id=?');
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $updated_company = $result->fetch_assoc();
+                echo json_encode(["message" => "Company updated", "status" => "success", "company" => $updated_company]);
             } else {
                 echo json_encode(["message" => "No company found with the given ID or no changes made", "status" => "error"]);
             }
@@ -35,7 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('s', $name);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "New company created", "status" => "success"]);
+            // Fetch the created company details
+            $company_id = $stmt->insert_id;
+            $stmt = $conn->prepare('SELECT * FROM companies WHERE company_id=?');
+            $stmt->bind_param('i', $company_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $created_company = $result->fetch_assoc();
+            echo json_encode(["message" => "New company created", "status" => "success", "company" => $created_company]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }

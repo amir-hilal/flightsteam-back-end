@@ -1,4 +1,4 @@
-// api/hotels/getAll.php
+<!-- // api/hotels/getAll.php -->
 <?php
 require "../../config/config.php";
 

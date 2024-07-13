@@ -1,5 +1,5 @@
 <?php
-require '../../vendor/autoload.php'; // Ensure this path is correct based on your project structure
+require_once '../../vendor/autoload.php'; // Ensure this path is correct based on your project structure
 
 use Dotenv\Dotenv;
 
@@ -17,4 +17,13 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-define('JWT_SECRET_KEY', $_ENV['JWT_SECRET_KEY']);
+if (!defined('JWT_SECRET_KEY')) {
+    define('JWT_SECRET_KEY', $_ENV['JWT_SECRET_KEY']);
+}
+if (!defined('SMTP_EMAIL')) {
+    define('SMTP_EMAIL', $_ENV['SMTP_EMAIL']);
+}
+if (!defined('SMTP_PASSWORD')) {
+    define('SMTP_PASSWORD', $_ENV['SMTP_PASSWORD']);
+}
+?>

@@ -25,7 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         try {
             $stmt->execute();
             if ($stmt->affected_rows > 0) {
-                echo json_encode(["message" => "Taxi updated", "status" => "success"]);
+                // Fetch the updated taxi details
+                $stmt = $conn->prepare('SELECT * FROM Taxis WHERE taxi_id=?');
+                $stmt->bind_param('i', $taxi_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $updated_taxi = $result->fetch_assoc();
+                echo json_encode(["message" => "Taxi updated", "status" => "success", "taxi" => $updated_taxi]);
             } else {
                 echo json_encode(["message" => "No taxi found with the given ID or no changes made", "status" => "error"]);
             }
@@ -38,7 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('ssdi', $company_name, $car_type, $price_per_km, $available);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "New taxi created", "status" => "success"]);
+            // Fetch the created taxi details
+            $taxi_id = $stmt->insert_id;
+            $stmt = $conn->prepare('SELECT * FROM Taxis WHERE taxi_id=?');
+            $stmt->bind_param('i', $taxi_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $created_taxi = $result->fetch_assoc();
+            echo json_encode(["message" => "New taxi created", "status" => "success", "taxi" => $created_taxi]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }

@@ -38,7 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('siiissdii', $flight_number, $company_id, $departure_airport_id, $arrival_airport_id, $departure_time, $arrival_time, $price, $available_seats, $flight_id);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "Flight updated", "status" => "success"]);
+            // Fetch the updated flight details
+            $stmt = $conn->prepare('SELECT * FROM Flights WHERE flight_id=?');
+            $stmt->bind_param('i', $flight_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $updated_flight = $result->fetch_assoc();
+            echo json_encode(["message" => "Flight updated", "status" => "success", "flight" => $updated_flight]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }
@@ -48,7 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('siiiisdi', $flight_number, $company_id, $departure_airport_id, $arrival_airport_id, $departure_time, $arrival_time, $price, $available_seats);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "New flight created", "status" => "success"]);
+            // Fetch the created flight details
+            $flight_id = $stmt->insert_id;
+            $stmt = $conn->prepare('SELECT * FROM Flights WHERE flight_id=?');
+            $stmt->bind_param('i', $flight_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $created_flight = $result->fetch_assoc();
+            echo json_encode(["message" => "New flight created", "status" => "success", "flight" => $created_flight]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }

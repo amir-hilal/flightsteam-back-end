@@ -1,4 +1,4 @@
-<!-- // api/admins/create_or_update.php -->
+// api/admins/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
@@ -46,7 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('sssssss', $first_name, $middle_name, $last_name, $email, $hashed_password, $role, $email);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "Admin account updated", "status" => "success"]);
+            // Fetch the updated admin account details
+            $stmt = $conn->prepare('SELECT * FROM AdminAccounts WHERE email = ?');
+            $stmt->bind_param('s', $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $updated_admin = $result->fetch_assoc();
+            echo json_encode(["message" => "Admin account updated", "status" => "success", "admin" => $updated_admin]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }
@@ -56,7 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('ssssss', $first_name, $middle_name, $last_name, $email, $hashed_password, $role);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "New admin account created", "status" => "success"]);
+            // Fetch the created admin account details
+            $admin_id = $stmt->insert_id;
+            $stmt = $conn->prepare('SELECT * FROM AdminAccounts WHERE admin_id = ?');
+            $stmt->bind_param('i', $admin_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $created_admin = $result->fetch_assoc();
+            echo json_encode(["message" => "New admin account created", "status" => "success", "admin" => $created_admin]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }

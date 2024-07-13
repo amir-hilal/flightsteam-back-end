@@ -26,7 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         try {
             $stmt->execute();
             if ($stmt->affected_rows > 0) {
-                echo json_encode(["message" => "Location updated", "status" => "success"]);
+                // Fetch the updated location details
+                $stmt = $conn->prepare('SELECT * FROM Locations WHERE location_id=?');
+                $stmt->bind_param('i', $location_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $updated_location = $result->fetch_assoc();
+                echo json_encode(["message" => "Location updated", "status" => "success", "location" => $updated_location]);
             } else {
                 echo json_encode(["message" => "No location found with the given ID or no changes made", "status" => "error"]);
             }
@@ -39,7 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('sddss', $city_name, $longitude, $latitude, $country, $city_code);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "New location created", "status" => "success"]);
+            // Fetch the created location details
+            $location_id = $stmt->insert_id;
+            $stmt = $conn->prepare('SELECT * FROM Locations WHERE location_id=?');
+            $stmt->bind_param('i', $location_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $created_location = $result->fetch_assoc();
+            echo json_encode(["message" => "New location created", "status" => "success", "location" => $created_location]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }
