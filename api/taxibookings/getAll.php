@@ -1,5 +1,9 @@
 <?php
 require "../../config/config.php";
+require "../utils/auth_middleware.php";
+require "../utils/response.php";
+
+$decoded_token = authenticate_admin(); // Authenticate admin
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('SELECT * FROM TaxiBookings;');
@@ -7,11 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $stmt->execute();
         $result = $stmt->get_result();
         $taxibookings = $result->fetch_all(MYSQLI_ASSOC);
-        echo json_encode(["taxibookings" => $taxibookings, "status" => "success"]);
+        send_response(["taxibookings" => $taxibookings, "status" => "success"], "Taxi bookings fetched successfully", 200);
     } catch (Exception $e) {
-        echo json_encode(["error" => $stmt->error]);
+        send_response(null, $stmt->error, 500);
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>

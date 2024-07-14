@@ -14,18 +14,24 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $id = $data['id'];
 
-    $stmt = $conn->prepare('DELETE FROM airports WHERE airport_id=?');
+    // Fetch the airport details before deletion
+    $stmt = $conn->prepare('SELECT * FROM airports WHERE airport_id = ?');
     $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $airport_to_delete = $result->fetch_assoc();
 
-    try {
-        $stmt->execute();
-        if ($stmt->affected_rows > 0) {
-            echo json_encode(["message" => "Airport deleted", "status" => "success"]);
-        } else {
-            echo json_encode(["message" => "No airport found with the given ID", "status" => "error"]);
+    if ($airport_to_delete) {
+        $stmt = $conn->prepare('DELETE FROM airports WHERE airport_id = ?');
+        $stmt->bind_param('i', $id);
+        try {
+            $stmt->execute();
+            echo json_encode(["message" => "Airport deleted", "status" => "success", "airport" => $airport_to_delete]);
+        } catch (Exception $e) {
+            echo json_encode(["error" => $stmt->error]);
         }
-    } catch (Exception $e) {
-        echo json_encode(["error" => $stmt->error]);
+    } else {
+        echo json_encode(["message" => "No airport found with the given ID", "status" => "error"]);
     }
 } else {
     echo json_encode(["error" => "Wrong request method"]);

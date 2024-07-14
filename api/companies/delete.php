@@ -1,4 +1,3 @@
-// api/companies/delete.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
@@ -14,18 +13,24 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $id = $data['id'];
 
-    $stmt = $conn->prepare('DELETE FROM companies WHERE company_id=?');
+    // Fetch the company details before deletion
+    $stmt = $conn->prepare('SELECT * FROM companies WHERE company_id = ?');
     $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $company_to_delete = $result->fetch_assoc();
 
-    try {
-        $stmt->execute();
-        if ($stmt->affected_rows > 0) {
-            echo json_encode(["message" => "Company deleted", "status" => "success"]);
-        } else {
-            echo json_encode(["message" => "No company found with the given ID", "status" => "error"]);
+    if ($company_to_delete) {
+        $stmt = $conn->prepare('DELETE FROM companies WHERE company_id = ?');
+        $stmt->bind_param('i', $id);
+        try {
+            $stmt->execute();
+            echo json_encode(["message" => "Company deleted", "status" => "success", "company" => $company_to_delete]);
+        } catch (Exception $e) {
+            echo json_encode(["error" => $stmt->error]);
         }
-    } catch (Exception $e) {
-        echo json_encode(["error" => $stmt->error]);
+    } else {
+        echo json_encode(["message" => "No company found with the given ID", "status" => "error"]);
     }
 } else {
     echo json_encode(["error" => "Wrong request method"]);

@@ -1,5 +1,10 @@
+// api/users/getAll.php
 <?php
 require "../../config/config.php";
+require "../utils/auth_middleware.php";
+require "../utils/response.php";
+
+$decoded_token = authenticate_admin(); // Ensure only admins can access
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('SELECT * FROM users;');
@@ -11,14 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             while ($row = $result->fetch_assoc()) {
                 $users[] = $row;
             }
-            echo json_encode(["users" => $users, "status" => "success"]);
+            send_response(["users" => $users], "Users fetched successfully", 200);
         } else {
-            echo json_encode(["message" => "No users were found", "status" => "error"]);
+            send_response(null, "No users were found", 404);
         }
     } catch (Exception $e) {
-        echo json_encode(["error" => $stmt->error, "status" => "error"]);
+        send_response(null, $stmt->error, 500);
     }
 } else {
-    echo json_encode(["error" => "Wrong request method", "status" => "error"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>

@@ -1,4 +1,3 @@
-<!-- // api/admins/login.php -->
 <?php
 require "../../config/config.php";
 require "../utils/jwt.php";
@@ -37,7 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Debugging: Check if password_verify passes
     if ($admin && password_verify($password, $admin['password'])) {
         error_log("Password verification successful");
-        $token = generate_jwt_token(['admin_id' => $admin['admin_id'], 'role' => 'admin']);
+        $payload = [
+            'user_id' => $admin['admin_id'], // Use user_id for consistency
+            'role' => 'admin',
+            'email' => $admin['email']
+        ];
+        $token = generate_jwt_token($payload);
         send_response(['token' => $token], 'Login successful', 200);
     } else {
         error_log("Invalid credentials for email: " . $email);
