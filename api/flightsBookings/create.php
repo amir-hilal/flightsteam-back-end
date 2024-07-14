@@ -2,6 +2,7 @@
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
 require "../utils/response.php";
+require "../utils/validator.php";
 
 $auth_data = authenticate_user_or_admin(); // Ensure only users and admins can create a booking
 
@@ -13,9 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         exit();
     }
 
+    // Validate input data
     $required_fields = ['flight_id', 'status', 'booking_date'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!validate_required($data[$field])) {
             send_response(null, "$field cannot be null or empty", 400);
             exit();
         }
@@ -25,6 +27,21 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $flight_id = $data['flight_id'];
     $status = $data['status'];
     $booking_date = $data['booking_date'];
+
+    if (!validate_int($flight_id)) {
+        send_response(null, 'Invalid flight ID', 400);
+        exit();
+    }
+
+    if (!validate_booking_status($status)) {
+        send_response(null, 'Invalid status', 400);
+        exit();
+    }
+
+    if (!validate_date($booking_date) && !validate_datetime($booking_date)) {
+        send_response(null, 'Invalid booking date', 400);
+        exit();
+    }
 
     // Check if the flight_id exists
     $stmt = $conn->prepare('SELECT * FROM flights WHERE flight_id = ?');

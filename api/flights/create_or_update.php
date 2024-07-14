@@ -1,7 +1,9 @@
-// api/flights/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php";
+require "../utils/response.php";
+
 $admin = authenticate_admin(); // Ensure only admins can create or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
@@ -9,15 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $data = json_decode(file_get_contents('php://input'), true);
 
     if ($data === null) {
-        echo json_encode(["error" => "Invalid JSON input"]);
+        send_response(null, "Invalid JSON input", 400);
         exit();
     }
 
     // Validate input data
     $required_fields = ['flight_number', 'company_id', 'departure_airport_id', 'arrival_airport_id', 'departure_time', 'arrival_time', 'price', 'available_seats'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
-            echo json_encode(["error" => "$field cannot be null or empty"]);
+        if (!validate_required($data[$field])) {
+            send_response(null, "$field cannot be null or empty", 400);
             exit();
         }
     }
@@ -30,6 +32,24 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $arrival_time = $data["arrival_time"];
     $price = $data["price"];
     $available_seats = $data["available_seats"];
+
+    // Validate flight_number
+    if (!validate_flight_number($flight_number)) {
+        send_response(null, "Invalid flight number", 400);
+        exit();
+    }
+
+    // Validate IDs and price
+    if (!validate_int($company_id) || !validate_int($departure_airport_id) || !validate_int($arrival_airport_id) || !validate_int($price) || !validate_int($available_seats)) {
+        send_response(null, "Company ID, airport IDs, price, and available seats must be integers", 400);
+        exit();
+    }
+
+    // Validate times
+    if (!validate_datetime($departure_time) || !validate_datetime($arrival_time)) {
+        send_response(null, "Invalid date and time format. Use 'Y-m-d H:i:s'", 400);
+        exit();
+    }
 
     if (isset($data['flight_id'])) {
         // Update existing flight
@@ -44,9 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $updated_flight = $result->fetch_assoc();
-            echo json_encode(["message" => "Flight updated", "status" => "success", "flight" => $updated_flight]);
+            send_response(["message" => "Flight updated", "status" => "success", "flight" => $updated_flight], 200);
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     } else {
         // Create new flight
@@ -61,12 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $created_flight = $result->fetch_assoc();
-            echo json_encode(["message" => "New flight created", "status" => "success", "flight" => $created_flight]);
+            send_response(["message" => "New flight created", "status" => "success", "flight" => $created_flight], 200);
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>

@@ -3,6 +3,7 @@ session_start();
 require "../../config/config.php";
 require "../utils/response.php";
 require "../utils/send_verification_email.php";
+require "../utils/validator.php"; // Include the validator
 date_default_timezone_set('Asia/Beirut'); // Set your timezone
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -12,12 +13,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate input data
     $required_fields = ['first_name', 'middle_name', 'last_name', 'email', 'password', 'phone_number'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!validate_required($data[$field])) {
             send_response(null, "$field cannot be null or empty", 400);
             exit();
         }
     }
 
+    // Additional validation
+    if (!validate_string($data['first_name']) || !validate_string($data['last_name'])) {
+        send_response(null, "First name and last name must be alphabetic strings", 400);
+        exit();
+    }
+
+    if (!validate_email($data['email'])) {
+        send_response(null, "Invalid email address", 400);
+        exit();
+    }
+
+    if (!validate_password($data['password'])) {
+        send_response(null, "Password must contain at least 8 characters, one number, and one special character", 400);
+        exit();
+    }
+
+    // Assign variables after validation
     $first_name = $data['first_name'];
     $middle_name = $data['middle_name'];
     $last_name = $data['last_name'];

@@ -2,6 +2,9 @@
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/response.php";
+require "../utils/validator.php"; // Include the validator
+
 $admin = authenticate_superadmin(); // Ensure only superadmins can add or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
@@ -10,17 +13,33 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     // Check if the JSON decoding was successful
     if ($data === null) {
-        echo json_encode(["error" => "Invalid JSON input"]);
+        send_response(null, 'Invalid JSON input', 400);
         exit();
     }
 
     // Validate input data
     $required_fields = ['first_name', 'middle_name', 'last_name', 'email', 'password', 'role'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
-            echo json_encode(["error" => "$field cannot be null or empty"]);
+        if (!validate_required($data[$field])) {
+            send_response(null, "$field cannot be null or empty", 400);
             exit();
         }
+    }
+
+    // Additional validation
+    if (!validate_string($data['first_name']) || !validate_string($data['last_name'])) {
+        send_response(null, "First name and last name must be alphabetic strings", 400);
+        exit();
+    }
+
+    if (!validate_email($data['email'])) {
+        send_response(null, "Invalid email address", 400);
+        exit();
+    }
+
+    if (!validate_password($data['password'])) {
+        send_response(null, "Password must contain at least 8 characters, one number, and one special character", 400);
+        exit();
     }
 
     $first_name = $data["first_name"];
@@ -33,31 +52,29 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Hash the password for storage and comparison
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // Check if the user already exists
-    $stmt = $conn->prepare('SELECT * FROM AdminAccounts WHERE email = ?');
-    $stmt->bind_param('s', $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $existing_admin = $result->fetch_assoc();
-
-    if ($existing_admin) {
-        // User exists, update the information
-        $stmt = $conn->prepare('UPDATE AdminAccounts SET first_name = ?, middle_name = ?, last_name = ?, email = ?, password = ?, role = ? WHERE email = ?');
-        $stmt->bind_param('sssssss', $first_name, $middle_name, $last_name, $email, $hashed_password, $role, $email);
+    if (isset($data['id'])) {
+        // Update existing admin
+        $id = $data['id'];
+        $stmt = $conn->prepare('UPDATE AdminAccounts SET first_name = ?, middle_name = ?, last_name = ?, email = ?, password = ?, role = ? WHERE admin_id = ?');
+        $stmt->bind_param('ssssssi', $first_name, $middle_name, $last_name, $email, $hashed_password, $role, $id);
         try {
             $stmt->execute();
-            // Fetch the updated admin account details
-            $stmt = $conn->prepare('SELECT * FROM AdminAccounts WHERE email = ?');
-            $stmt->bind_param('s', $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $updated_admin = $result->fetch_assoc();
-            echo json_encode(["message" => "Admin account updated", "status" => "success", "admin" => $updated_admin]);
+            if ($stmt->affected_rows > 0) {
+                // Fetch the updated admin account details
+                $stmt = $conn->prepare('SELECT * FROM AdminAccounts WHERE admin_id = ?');
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $updated_admin = $result->fetch_assoc();
+                send_response(["message" => "Admin account updated", "status" => "success", "admin" => $updated_admin], "Admin account updated successfully", 200);
+            } else {
+                send_response(null, "No admin found with the given ID or no changes made", 404);
+            }
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     } else {
-        // User does not exist, create a new one
+        // Create new admin
         $stmt = $conn->prepare('INSERT INTO AdminAccounts (first_name, middle_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->bind_param('ssssss', $first_name, $middle_name, $last_name, $email, $hashed_password, $role);
         try {
@@ -69,12 +86,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $created_admin = $result->fetch_assoc();
-            echo json_encode(["message" => "New admin account created", "status" => "success", "admin" => $created_admin]);
+            send_response(["message" => "New admin account created", "status" => "success", "admin" => $created_admin], "New admin account created successfully", 200);
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>

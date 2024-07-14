@@ -1,7 +1,7 @@
-<?php
-session_start();
+<?phpsession_start();
 require "../../config/config.php";
 require "../utils/response.php";
+require "../utils/validator.php"; // Include the validator
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Decode JSON input
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate input data
     $required_fields = ['email', 'verification_code'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!validate_required($data[$field])) {
             error_log("$field cannot be null or empty");
             send_response(null, "$field cannot be null or empty", 400);
             exit();
@@ -22,6 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $email = $data['email'];
     $verification_code = $data['verification_code'];
+
+    if (!validate_email($email)) {
+        send_response(null, "Invalid email address", 400);
+        exit();
+    }
 
     // Log the email and verification code for debugging
     error_log("Email: $email");

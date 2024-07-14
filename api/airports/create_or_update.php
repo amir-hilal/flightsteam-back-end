@@ -1,7 +1,8 @@
-// api/airports/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php"; // Include the validator
+
 $admin = authenticate_admin(); // Ensure only admins can create or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
@@ -13,14 +14,30 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
 
     $name = $data["name"];
-    $location = $data["location"];
+    $location_id = $data["location_id"];
     $code = $data["code"];
+
+    // Validate inputs
+    if (!validate_string($name)) {
+        echo json_encode(["error" => "Name must be a valid string"]);
+        exit();
+    }
+
+    if (!validate_int($location_id)) {
+        echo json_encode(["error" => "Location ID must be an integer"]);
+        exit();
+    }
+
+    if (!validate_code($code)) {
+        echo json_encode(["error" => "Code must be 3 uppercase letters and can contain numbers, but at least 1 character"]);
+        exit();
+    }
 
     if (isset($data['id'])) {
         // Update existing airport
         $id = $data['id'];
-        $stmt = $conn->prepare('UPDATE airports SET name=?, location=?, code=? WHERE airport_id=?');
-        $stmt->bind_param('sssi', $name, $location, $code, $id);
+        $stmt = $conn->prepare('UPDATE airports SET name=?, location_id=?, code=? WHERE airport_id=?');
+        $stmt->bind_param('sisi', $name, $location_id, $code, $id);
         try {
             $stmt->execute();
             if ($stmt->affected_rows > 0) {
@@ -39,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
     } else {
         // Create new airport
-        $stmt = $conn->prepare('INSERT INTO airports (name, location, code) VALUES (?, ?, ?);');
-        $stmt->bind_param('sss', $name, $location, $code);
+        $stmt = $conn->prepare('INSERT INTO airports (name, location_id, code) VALUES (?, ?, ?);');
+        $stmt->bind_param('sis', $name, $location_id, $code);
         try {
             $stmt->execute();
             // Fetch the created airport details

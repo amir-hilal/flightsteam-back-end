@@ -1,15 +1,25 @@
-// api/locations/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php";
+require "../utils/response.php";
+
 $admin = authenticate_admin(); // Ensure only admins can create or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $data = json_decode(file_get_contents('php://input'), true);
 
     if ($data === null) {
-        echo json_encode(["error" => "Invalid JSON input"]);
+        send_response(null, "Invalid JSON input", 400);
         exit();
+    }
+
+    $required_fields = ['city_name', 'longitude', 'latitude', 'country', 'city_code'];
+    foreach ($required_fields as $field) {
+        if (!validate_required($data[$field])) {
+            send_response(null, "$field cannot be null or empty", 400);
+            exit();
+        }
     }
 
     $city_name = $data["city_name"];
@@ -17,6 +27,31 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $latitude = $data["latitude"];
     $country = $data["country"];
     $city_code = $data["city_code"];
+
+    if (!validate_string($city_name)) {
+        send_response(null, "City name must be a string", 400);
+        exit();
+    }
+
+    if (!validate_float($longitude)) {
+        send_response(null, "Longitude must be a float", 400);
+        exit();
+    }
+
+    if (!validate_float($latitude)) {
+        send_response(null, "Latitude must be a float", 400);
+        exit();
+    }
+
+    if (!validate_string($country)) {
+        send_response(null, "Country must be a string", 400);
+        exit();
+    }
+
+    if (!validate_code($city_code)) {
+        send_response(null, "City code must be 3 uppercase letters and can contain numbers, but at least 1 letter", 400);
+        exit();
+    }
 
     if (isset($data['location_id'])) {
         // Update existing location
@@ -32,12 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $updated_location = $result->fetch_assoc();
-                echo json_encode(["message" => "Location updated", "status" => "success", "location" => $updated_location]);
+                send_response(["message" => "Location updated", "status" => "success", "location" => $updated_location], 200);
             } else {
-                echo json_encode(["message" => "No location found with the given ID or no changes made", "status" => "error"]);
+                send_response(null, "No location found with the given ID or no changes made", 404);
             }
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     } else {
         // Create new location
@@ -52,12 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $created_location = $result->fetch_assoc();
-            echo json_encode(["message" => "New location created", "status" => "success", "location" => $created_location]);
+            send_response(["message" => "New location created", "status" => "success", "location" => $created_location], 200);
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>

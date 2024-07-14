@@ -1,18 +1,33 @@
-// api/companies/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php";
+require "../utils/response.php";
+
 $admin = authenticate_admin(); // Ensure only admins can create or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $data = json_decode(file_get_contents('php://input'), true);
 
     if ($data === null) {
-        echo json_encode(["error" => "Invalid JSON input"]);
+        send_response(null, "Invalid JSON input", 400);
         exit();
     }
 
+    $required_fields = ['name'];
+    foreach ($required_fields as $field) {
+        if (!validate_required($data[$field])) {
+            send_response(null, "$field cannot be null or empty", 400);
+            exit();
+        }
+    }
+
     $name = $data["name"];
+
+    if (!validate_string($name)) {
+        send_response(null, "Name must be a string", 400);
+        exit();
+    }
 
     if (isset($data['id'])) {
         // Update existing company
@@ -28,12 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $updated_company = $result->fetch_assoc();
-                echo json_encode(["message" => "Company updated", "status" => "success", "company" => $updated_company]);
+                send_response(["message" => "Company updated", "status" => "success", "company" => $updated_company], 200);
             } else {
-                echo json_encode(["message" => "No company found with the given ID or no changes made", "status" => "error"]);
+                send_response(null, "No company found with the given ID or no changes made", 404);
             }
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     } else {
         // Create new company
@@ -48,12 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $created_company = $result->fetch_assoc();
-            echo json_encode(["message" => "New company created", "status" => "success", "company" => $created_company]);
+            send_response(["message" => "New company created", "status" => "success", "company" => $created_company], 200);
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>

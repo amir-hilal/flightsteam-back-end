@@ -1,21 +1,51 @@
-// api/taxis/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php";
+require "../utils/response.php";
+
 $admin = authenticate_admin(); // Ensure only admins can create or update
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $data = json_decode(file_get_contents('php://input'), true);
 
     if ($data === null) {
-        echo json_encode(["error" => "Invalid JSON input"]);
+        send_response(null, "Invalid JSON input", 400);
         exit();
+    }
+
+    $required_fields = ['company_name', 'car_type', 'price_per_km', 'available'];
+    foreach ($required_fields as $field) {
+        if (!validate_required($data[$field])) {
+            send_response(null, "$field cannot be null or empty", 400);
+            exit();
+        }
     }
 
     $company_name = $data["company_name"];
     $car_type = $data["car_type"];
     $price_per_km = $data["price_per_km"];
     $available = $data["available"];
+
+    if (!validate_string($company_name)) {
+        send_response(null, "Company name must be a string", 400);
+        exit();
+    }
+
+    if (!validate_string($car_type)) {
+        send_response(null, "Car type must be a string", 400);
+        exit();
+    }
+
+    if (!validate_int($price_per_km)) {
+        send_response(null, "Price per km must be an integer", 400);
+        exit();
+    }
+
+    if (!is_bool($available)) {
+        send_response(null, "Available must be a boolean", 400);
+        exit();
+    }
 
     if (isset($data['taxi_id'])) {
         // Update existing taxi
@@ -31,12 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $updated_taxi = $result->fetch_assoc();
-                echo json_encode(["message" => "Taxi updated", "status" => "success", "taxi" => $updated_taxi]);
+                send_response(["message" => "Taxi updated", "status" => "success", "taxi" => $updated_taxi], 200);
             } else {
-                echo json_encode(["message" => "No taxi found with the given ID or no changes made", "status" => "error"]);
+                send_response(null, "No taxi found with the given ID or no changes made", 404);
             }
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     } else {
         // Create new taxi
@@ -51,12 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $created_taxi = $result->fetch_assoc();
-            echo json_encode(["message" => "New taxi created", "status" => "success", "taxi" => $created_taxi]);
+            send_response(["message" => "New taxi created", "status" => "success", "taxi" => $created_taxi], 200);
         } catch (Exception $e) {
-            echo json_encode(["error" => $stmt->error]);
+            send_response(null, $stmt->error, 500);
         }
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>
