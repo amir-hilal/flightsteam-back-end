@@ -1,6 +1,7 @@
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php";
 require "../utils/response.php";
 
 $decoded_token = authenticate_user_or_admin(); // Authenticate user or admin
@@ -15,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $required_fields = ['taxi_id', 'pickup_location_id', 'dropoff_location_id', 'pickup_time', 'status'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!validate_required($data[$field])) {
             send_response(null, "$field cannot be null or empty", 400);
             exit();
         }
@@ -27,6 +28,30 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $dropoff_location_id = $data["dropoff_location_id"];
     $pickup_time = $data["pickup_time"];
     $status = $data["status"];
+
+    // Validate taxi ID
+    if (!validate_int($taxi_id)) {
+        send_response(null, "Taxi ID must be an integer", 400);
+        exit();
+    }
+
+    // Validate pickup and dropoff location IDs
+    if (!validate_int($pickup_location_id) || !validate_int($dropoff_location_id)) {
+        send_response(null, "Location IDs must be integers", 400);
+        exit();
+    }
+
+    // Validate pickup time
+    if (!validate_datetime($pickup_time)) {
+        send_response(null, "Invalid datetime format for pickup time. Use 'Y-m-d H:i:s'", 400);
+        exit();
+    }
+
+    // Validate status
+    if (!validate_booking_status($status)) {
+        send_response(null, "Invalid booking status. Use 'confirmed', 'pending', or 'cancelled'", 400);
+        exit();
+    }
 
     // Validate if the taxi exists
     $stmt = $conn->prepare('SELECT * FROM Taxis WHERE taxi_id = ?');

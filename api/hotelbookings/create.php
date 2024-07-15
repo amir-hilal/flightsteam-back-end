@@ -1,6 +1,7 @@
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+require "../utils/validator.php";
 require "../utils/response.php";
 
 $decoded_token = authenticate_user_or_admin(); // Authenticate user or admin
@@ -15,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
     $required_fields = ['hotel_id', 'check_in_date', 'check_out_date', 'status'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!validate_required($data[$field])) {
             send_response(null, "$field cannot be null or empty", 400);
             exit();
         }
@@ -26,6 +27,26 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $check_in_date = $data["check_in_date"];
     $check_out_date = $data["check_out_date"];
     $status = $data["status"];
+
+    if (!validate_int($hotel_id)) {
+        send_response(null, "Hotel ID must be an integer", 400);
+        exit();
+    }
+
+    if (!validate_date($check_in_date)) {
+        send_response(null, "Check-in date must be a valid date (YYYY-MM-DD)", 400);
+        exit();
+    }
+
+    if (!validate_date($check_out_date)) {
+        send_response(null, "Check-out date must be a valid date (YYYY-MM-DD)", 400);
+        exit();
+    }
+
+    if (!validate_booking_status($status)) {
+        send_response(null, "Status must be one of the following: confirmed, pending, cancelled", 400);
+        exit();
+    }
 
     // Validate if the hotel exists
     $stmt = $conn->prepare('SELECT * FROM Hotels WHERE hotel_id = ?');
