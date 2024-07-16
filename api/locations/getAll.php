@@ -1,18 +1,33 @@
-// api/locations/getAll.php
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+
 require "../../config/config.php";
+require "../utils/response.php";
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $stmt = $conn->prepare('SELECT * FROM Locations;');
+    $query = "
+        SELECT
+            location_id,
+            city_name,
+            country,
+            city_code
+        FROM Locations
+    ";
+
+    $stmt = $conn->prepare($query);
+
     try {
         $stmt->execute();
         $result = $stmt->get_result();
         $locations = $result->fetch_all(MYSQLI_ASSOC);
-        echo json_encode(["locations" => $locations, "status" => "success"]);
+        send_response(["locations" => $locations], "Locations retrieved successfully", 200);
     } catch (Exception $e) {
-        echo json_encode(["error" => $stmt->error]);
+        send_response(null, $stmt->error, 500);
     }
 } else {
-    echo json_encode(["error" => "Wrong request method"]);
+    send_response(null, "Wrong request method", 405);
 }
 ?>
+

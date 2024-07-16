@@ -1,4 +1,4 @@
-<?phpsession_start();
+<?php session_start();
 require "../../config/config.php";
 require "../utils/response.php";
 require "../utils/validator.php"; // Include the validator

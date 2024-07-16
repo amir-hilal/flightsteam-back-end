@@ -1,5 +1,11 @@
-// api/flights/getAll.php
 <?php
+// api/flights/getAll.php
+  header("Access-Control-Allow-Origin: *");
+  header("Access-Control-Allow-Headers: *");
+  header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+
+  // Rest of your PHP code
+
 require "../../config/config.php";
 require "../utils/response.php";
 

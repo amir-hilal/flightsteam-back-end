@@ -1,9 +1,19 @@
-// api/flights/delete.php
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 require "../../config/config.php";
-require "../utils/auth_middleware.php";
+//require "../utils/auth_middleware.php";
 require "../utils/response.php";
-$admin = authenticate_admin(); // Ensure only admins can delete
+
+//$admin = authenticate_admin(); // Ensure only admins can delete
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $data = json_decode(file_get_contents('php://input'), true);

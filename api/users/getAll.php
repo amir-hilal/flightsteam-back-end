@@ -1,10 +1,12 @@
-// api/users/getAll.php
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 require "../../config/config.php";
-require "../utils/auth_middleware.php";
+//require "../utils/auth_middleware.php";
 require "../utils/response.php";
 
-$decoded_token = authenticate_admin(); // Ensure only admins can access
+//$decoded_token = authenticate_admin(); // Ensure only admins can access
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('SELECT * FROM users;');
