@@ -2,6 +2,7 @@
 require "../../config/config.php";
 require "../utils/jwt.php";
 require "../utils/response.php";
+include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Decode JSON input

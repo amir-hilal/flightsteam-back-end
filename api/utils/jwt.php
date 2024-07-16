@@ -1,4 +1,3 @@
-// utils/jwt.php
 <?php
 require "../../vendor/autoload.php"; // Ensure this path is correct based on your project structure
 

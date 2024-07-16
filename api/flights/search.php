@@ -1,7 +1,7 @@
-// api/flights/search.php
 <?php
 require "../../config/config.php";
 require "../utils/response.php";
+include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $data = json_decode(file_get_contents('php://input'), true);

@@ -3,6 +3,7 @@ require "../../config/config.php";
 require "../utils/auth_middleware.php";
 require "../utils/validator.php";
 require "../utils/response.php";
+include '../utils/cors.php';
 
 $admin = authenticate_admin(); // Ensure only admins can create or update
 

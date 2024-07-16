@@ -1,6 +1,6 @@
-// api/locations/getAll.php
 <?php
 require "../../config/config.php";
+include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('SELECT * FROM Locations;');

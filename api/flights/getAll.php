@@ -1,7 +1,7 @@
-// api/flights/getAll.php
 <?php
 require "../../config/config.php";
 require "../utils/response.php";
+include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $query = "

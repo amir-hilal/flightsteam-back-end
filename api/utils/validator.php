@@ -10,10 +10,13 @@ function validate_email($email) {
 function validate_string($string) {
     return is_string($string) && preg_match('/^[a-zA-Z]+$/', $string);
 }
-
 function validate_password($password) {
-    return preg_match('/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/', $password);
+    $pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,20}$/';
+    return preg_match($pattern, $password);
 }
+
+
+
 
 function validate_code($value) {
     return preg_match("/^[A-Z0-9]{3}$/", $value) && preg_match("/[A-Z]/", $value);

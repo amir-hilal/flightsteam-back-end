@@ -1,6 +1,7 @@
 <?php
 require "../../config/config.php";
 require "../utils/validator.php"; // Include the validator
+include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $id = $_POST['id'];

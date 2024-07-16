@@ -1,5 +1,6 @@
 <?php
 require "../../config/config.php";
+include '../utils/cors.php';
 require "../utils/auth_middleware.php";
 $admin = authenticate_admin(); // Allow all admins to get all admin accounts
 

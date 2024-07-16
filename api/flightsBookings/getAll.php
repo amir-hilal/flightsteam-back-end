@@ -1,4 +1,5 @@
 <?php
+include '../utils/cors.php';
 require "../../config/config.php";
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
     $stmt = $conn->prepare('select * from bookings');

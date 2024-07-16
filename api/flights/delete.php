@@ -1,7 +1,7 @@
-// api/flights/delete.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
+include '../utils/cors.php';
 require "../utils/response.php";
 $admin = authenticate_admin(); // Ensure only admins can delete
 

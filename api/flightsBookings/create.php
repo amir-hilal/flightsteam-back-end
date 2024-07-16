@@ -3,6 +3,7 @@ require "../../config/config.php";
 require "../utils/auth_middleware.php";
 require "../utils/response.php";
 require "../utils/validator.php";
+include '../utils/cors.php';
 
 $auth_data = authenticate_user_or_admin(); // Ensure only users and admins can create a booking
 

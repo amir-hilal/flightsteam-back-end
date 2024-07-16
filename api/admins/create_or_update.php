@@ -1,9 +1,9 @@
-// api/admins/create_or_update.php
 <?php
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
 require "../utils/response.php";
 require "../utils/validator.php"; // Include the validator
+include '../utils/cors.php';
 
 $admin = authenticate_superadmin(); // Ensure only superadmins can add or update
 

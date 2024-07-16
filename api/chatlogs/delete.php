@@ -1,5 +1,6 @@
 <?php
 require "../../config/config.php";
+include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $chat_id = $_POST["chat_id"];

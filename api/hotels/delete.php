@@ -1,6 +1,6 @@
-// api/hotels/delete.php
 <?php
 require "../../config/config.php";
+include '../utils/cors.php';
 require "../utils/auth_middleware.php";
 $admin = authenticate_admin(); // Ensure only admins can delete
 

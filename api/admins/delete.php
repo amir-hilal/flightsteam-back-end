@@ -1,5 +1,6 @@
 <?php
 require "../../config/config.php";
+include '../utils/cors.php';
 require "../utils/auth_middleware.php";
 $admin = authenticate_superadmin(); // Ensure only superadmins can delete
 

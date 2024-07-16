@@ -2,6 +2,7 @@
 require "../../config/config.php";
 require "../utils/auth_middleware.php";
 require "../utils/response.php";
+include '../utils/cors.php';
 
 $decoded_token = authenticate_user_or_admin(); // Authenticate user or admin
 
