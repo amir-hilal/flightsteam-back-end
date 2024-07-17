@@ -1,0 +1,46 @@
+# Ignore .env file
+.env
+
+# Ignore Composer dependencies
+/vendor/
+
+# Ignore log files and directories
+/logs/
+/*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor config files
+.vscode/
+/.idea/
+
+# Ignore OS generated files
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Ignore specific database files
+*.sql
+*.sqlite
+
+# Ignore cache files and directories
+/cache/
+/tmp/
+
+# Ignore compiled PHP extensions
+*.so
+
+# Ignore PHPStorm project files
+/.idea/
+
+# Ignore PHPUnit result cache
+.phpunit.result.cache
+
+# Ignore node_modules if you have front-end dependencies
+/node_modules/
+
+# Ignore build directories
+/build/
