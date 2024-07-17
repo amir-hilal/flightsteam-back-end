@@ -3,7 +3,18 @@ require "../../config/config.php";
 include '../utils/cors.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $stmt = $conn->prepare('SELECT * FROM Hotels;');
+    $stmt = $conn->prepare('
+        SELECT
+            h.hotel_id,
+            h.name,
+            h.price_per_night,
+            h.available_rooms,
+            l.city_name,
+            l.country,
+            l.city_code
+        FROM Hotels h
+        INNER JOIN Locations l ON h.location_id = l.location_id;
+    ');
     try {
         $stmt->execute();
         $result = $stmt->get_result();
