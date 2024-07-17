@@ -16,12 +16,9 @@ function generate_jwt_token($payload) {
 
 function validate_jwt_token($token) {
     try {
-        error_log("JWT Token: " . $token); // Debugging: Log the JWT token
         $decoded = JWT::decode($token, new Key(JWT_SECRET_KEY, 'HS256')); // Ensure headers are passed correctly
-        error_log("Decoded Token: " . print_r($decoded, true)); // Debugging: Log the decoded token
         return (array) $decoded;
     } catch (Exception $e) {
-        error_log("JWT Decode Error: " . $e->getMessage()); // Debugging: Log the error message
         return null;
     }
 }
