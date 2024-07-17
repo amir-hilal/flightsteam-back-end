@@ -1,9 +1,9 @@
 <?php
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+
 require "../../config/config.php";
+include '../utils/cors.php';
+require "../utils/auth_middleware.php";
+$decoded_token = authenticate_user_or_admin(); // Authenticate user or admin
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $input = json_decode(file_get_contents('php://input'), true);

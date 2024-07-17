@@ -14,7 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             while ($row = $result->fetch_assoc()) {
                 $admins[] = $row;
             }
-            echo json_encode(["admins" => $admins, "status" => "success"]);
+            // echo json_encode(["admins" => $admins, "status" => "success"]);
+        send_response(["admins" => $admins, "status" => "success"], "Admins details retrieved successfully", 200);
+
         } else {
             echo json_encode(["message" => "No admins were found", "status" => "error"]);
         }

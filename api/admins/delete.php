@@ -5,7 +5,14 @@ require "../utils/auth_middleware.php";
 $admin = authenticate_superadmin(); // Ensure only superadmins can delete
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $admin_id = $_POST["admin_id"];
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if ($data === null) {
+        send_response(null, "Invalid JSON input", 400);
+        exit();
+    }
+
+    $admin_id = $data["admin_id"];
 
     // Fetch the admin account details before deletion
     $stmt = $conn->prepare('SELECT * FROM AdminAccounts WHERE admin_id = ?');
@@ -19,7 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $stmt->bind_param('i', $admin_id);
         try {
             $stmt->execute();
-            echo json_encode(["message" => "Admin account deleted", "status" => "success", "admin" => $admin_to_delete]);
+        send_response(["Deleted User" => $admin_to_delete, "status" => "success"], "Company details retrieved successfully", 200);
+
+            // echo json_encode(["message" => "Admin account deleted", "status" => "success", "admin" => $admin_to_delete]);
         } catch (Exception $e) {
             echo json_encode(["error" => $stmt->error]);
         }

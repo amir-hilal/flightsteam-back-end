@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             f.flight_id,
             f.flight_number,
             f.company_id,
+            c.name AS company_name,
             f.departure_airport_id,
             f.arrival_airport_id,
             f.departure_time,
@@ -24,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         FROM Flights f
         INNER JOIN Locations da ON f.departure_airport_id = da.location_id
         INNER JOIN Locations aa ON f.arrival_airport_id = aa.location_id
+        INNER JOIN companies c ON f.company_id = c.company_id
     ";
 
     $stmt = $conn->prepare($query);

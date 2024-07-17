@@ -52,6 +52,26 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         exit();
     }
 
+    // Check for duplicate flight number
+    if (isset($data['flight_id'])) {
+        // Update existing flight, ensure flight number is not used by another flight
+        $flight_id = $data['flight_id'];
+        $stmt = $conn->prepare('SELECT * FROM Flights WHERE flight_number = ? AND flight_id != ?');
+        $stmt->bind_param('si', $flight_number, $flight_id);
+    } else {
+        // Create new flight, ensure flight number is not already used
+        $stmt = $conn->prepare('SELECT * FROM Flights WHERE flight_number = ?');
+        $stmt->bind_param('s', $flight_number);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        send_response(null, "Flight number already exists", 400);
+        exit();
+    }
+
     if (isset($data['flight_id'])) {
         // Update existing flight
         $flight_id = $data['flight_id'];
@@ -82,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             $stmt->execute();
             $result = $stmt->get_result();
             $created_flight = $result->fetch_assoc();
-            send_response(["message" => "New flight created", "status" => "success", "flight" => $created_flight], 200);
+            send_response(["status" => "success", "flight" => $created_flight], "New flight created", 200);
         } catch (Exception $e) {
             send_response(null, $stmt->error, 500);
         }
