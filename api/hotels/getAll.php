@@ -13,13 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             l.country,
             l.city_code
         FROM Hotels h
-        INNER JOIN Locations l ON h.location_id = l.location_id;
+         JOIN Locations l ON h.location_id = l.location_id;
     ');
     try {
         $stmt->execute();
         $result = $stmt->get_result();
         $hotels = $result->fetch_all(MYSQLI_ASSOC);
-        echo json_encode(["hotels" => $hotels, "status" => "success"]);
+        send_response(["hotels" => $hotels, "status" => "success"], "Hotels fetched successfully", 200);
+
     } catch (Exception $e) {
         echo json_encode(["error" => $stmt->error]);
     }
