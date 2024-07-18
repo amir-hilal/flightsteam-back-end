@@ -1,6 +1,6 @@
 <?php
 require "../../config/config.php";
-include '../utils/cors.php';
+include "../utils/cors.php";
 require "../utils/jwt.php"; // Include the JWT validation functions
 require "../utils/response.php";
 
@@ -26,7 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         exit();
     }
 
+    // Debug: Print the decoded token
+    error_log("Decoded token: " . print_r($decoded, true));
+
+    if (!isset($decoded['user_id'])) {
+        send_response(null, "User ID not found in token", 400);
+        exit();
+    }
+
     $user_id = $decoded['user_id'];
+    error_log("User ID from token: " . $user_id);
 
     $query = "
         SELECT
