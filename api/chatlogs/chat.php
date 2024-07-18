@@ -23,6 +23,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 $admin_or_user = authenticate_user_or_admin(); // Ensure only authenticated users or admins can send messages
 
+function get_openai_response($message) {
+    // URL for the local proxy
+    $url = 'http://localhost:3000/api/openai/chat';
+    $data = [
+        'message' => $message
+    ];
+
+    error_log('OpenAI request data: ' . json_encode($data));
+    $options = [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: application/json"
+        ],
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($data)
+    ];
+
+    $ch = curl_init();
+    curl_setopt_array($ch, $options);
+    $result = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        error_log('cURL error: ' . curl_error($ch));
+        curl_close($ch);
+        return null;
+    }
+
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($http_code !== 200) {
+        error_log('HTTP error code: ' . $http_code);
+        error_log('cURL response: ' . $result);
+        curl_close($ch);
+        return null;
+    }
+
+    $response = json_decode($result, true);
+    error_log('OpenAI response: ' . json_encode($response));
+
+    curl_close($ch);
+
+    return $response['choices'][0]['message']['content'] ?? null;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Decode JSON input
     $data = json_decode(file_get_contents('php://input'), true);
@@ -48,12 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Save chat log in the database
-    $stmt = $conn->prepare('INSERT INTO chatlogs (user_id, message, sender, timestamp) VALUES (?, ?, ?, ?)');
-    $stmt->bind_param('isss', $user_id, $message, 'user', date('Y-m-d H:i:s'));
-    $stmt->execute();
+    $timestamp = date('Y-m-d H:i:s');
 
     $stmt = $conn->prepare('INSERT INTO chatlogs (user_id, message, sender, timestamp) VALUES (?, ?, ?, ?)');
-    $stmt->bind_param('isss', $user_id, $openai_response, 'bot', date('Y-m-d H:i:s'));
+    $sender = 'user';
+    $stmt->bind_param('isss', $user_id, $message, $sender, $timestamp);
+    $stmt->execute();
+
+    $sender = 'bot';
+    $stmt = $conn->prepare('INSERT INTO chatlogs (user_id, message, sender, timestamp) VALUES (?, ?, ?, ?)');
+    $stmt->bind_param('isss', $user_id, $openai_response, $sender, $timestamp);
     $stmt->execute();
 
     // Return the response to the frontend
