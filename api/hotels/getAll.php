@@ -19,8 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $stmt->execute();
         $result = $stmt->get_result();
         $hotels = $result->fetch_all(MYSQLI_ASSOC);
-        send_response(["hotels" => $hotels, "status" => "success"], "Hotels fetched successfully", 200);
-
+        echo json_encode(["hotels" => $hotels, "status" => "success"]);
     } catch (Exception $e) {
         echo json_encode(["error" => $stmt->error]);
     }
