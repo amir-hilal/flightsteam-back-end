@@ -11,10 +11,9 @@ function validate_string($string) {
     return is_string($string) && preg_match('/^[a-zA-Z]+$/', $string);
 }
 function validate_password($password) {
-    $pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,20}$/';
+    $pattern = '/^(?=.*\d).{8,20}$/';
     return preg_match($pattern, $password);
 }
-
 
 
 

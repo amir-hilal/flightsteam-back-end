@@ -7,7 +7,7 @@
 # Ignore log files and directories
 /logs/
 /*.log
-
+/vendor
 # Ignore system files
 .DS_Store
 Thumbs.db
