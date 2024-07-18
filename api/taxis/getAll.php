@@ -12,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         $stmt->execute();
         $result = $stmt->get_result();
         $taxis = $result->fetch_all(MYSQLI_ASSOC);
-        echo json_encode(["taxis" => $taxis, "status" => "success"]);
+        send_response(["taxis" => $taxis, "status" => "success"], "taxis fetched successfully", 200);
+
     } catch (Exception $e) {
         echo json_encode(["error" => $stmt->error]);
     }

@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
             aa.country AS arrival_country,
             aa.city_code AS arrival_city_code
         FROM Flights f
-        INNER JOIN Locations da ON f.departure_airport_id = da.location_id
-        INNER JOIN Locations aa ON f.arrival_airport_id = aa.location_id
-        INNER JOIN companies c ON f.company_id = c.company_id
+         JOIN Locations da ON f.departure_airport_id = da.location_id
+         JOIN Locations aa ON f.arrival_airport_id = aa.location_id
+         JOIN companies c ON f.company_id = c.company_id
     ";
 
     $stmt = $conn->prepare($query);
